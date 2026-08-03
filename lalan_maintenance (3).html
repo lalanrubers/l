@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LALAN Rubbers – Factory Maintenance</title>
+<style>
+:root{--green:#4caf50;--green-dark:#2e7d32;--blue:#1565c0;--blue-light:#e3f2fd;--danger:#c62828;--danger-bg:#ffebee;--warning:#e65100;--warning-bg:#fff3e0;--success:#2e7d32;--success-bg:#e8f5e9;--gray:#546e7a;--gray-light:#f5f5f5;--border:#e0e0e0;--text:#212121;--text-sec:#546e7a;--white:#ffffff;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:var(--text);min-height:100vh}
+.header{background:var(--white);border-bottom:3px solid var(--green);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo-area{display:flex;align-items:center;gap:14px}
+.logo-img{height:40px}
+.logo-divider{width:1px;height:32px;background:var(--border)}
+.logo-title{font-size:15px;font-weight:700;color:var(--green-dark);line-height:1.2}
+.logo-sub{font-size:11px;color:var(--text-sec);font-weight:400}
+.header-right{display:flex;align-items:center;gap:8px}
+.date-badge{font-size:12px;color:var(--text-sec);background:var(--gray-light);border-radius:20px;padding:4px 12px}
+.add-btn{background:var(--green);color:white;border:none;border-radius:var(--radius);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .2s}
+.add-btn:hover{background:var(--green-dark)}
+.hdr-btn{background:transparent;color:var(--text-sec);border:1px solid var(--border);border-radius:var(--radius);padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.hdr-btn:hover{background:var(--gray-light);color:var(--text)}
+.hdr-btn.pdf{border-color:#c62828;color:#c62828}
+.hdr-btn.pdf:hover{background:#ffebee}
+.container{max-width:1160px;margin:0 auto;padding:1.5rem 1rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+.kpi{background:var(--white);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.kpi-label{font-size:11px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.kpi-val{font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.kpi-val.red{color:var(--danger)}.kpi-val.amber{color:var(--warning)}.kpi-val.green{color:var(--success)}
+.kpi-sub{font-size:11px;color:var(--text-sec);margin-top:3px}
+.tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--white);border-radius:var(--radius);padding:4px;border:1px solid var(--border);width:fit-content;box-shadow:var(--shadow)}
+.tab{padding:7px 18px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-sec);transition:all .15s}
+.tab.active{background:var(--green);color:white}
+.tab:hover:not(.active){background:var(--gray-light)}
+.view{display:none}.view.active{display:block}
+.filter-bar{display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-size:13px;background:var(--white);color:var(--text);outline:none;height:36px}
+.filter-bar input{min-width:230px}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--green)}
+.table-wrap{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{background:#f8faf8;border-bottom:2px solid var(--green);padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8faf8}
+td{padding:10px 12px;font-size:13px;vertical-align:middle}
+.task-name{font-weight:600;color:var(--text)}
+.task-dept{font-size:11px;color:var(--text-sec);margin-top:2px}
+.countdown-cell{display:flex;flex-direction:column;align-items:flex-start}
+.days-big{font-size:20px;font-weight:700;line-height:1}
+.days-label{font-size:10px;color:var(--text-sec)}
+.days-big.red{color:var(--danger)}.days-big.amber{color:var(--warning)}.days-big.green{color:var(--success)}
+.progress-wrap{width:80px}
+.progress-track{height:5px;background:#e0e0e0;border-radius:3px;overflow:hidden}
+.progress-fill{height:5px;border-radius:3px;transition:width 1s ease}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.badge.red{background:var(--danger-bg);color:var(--danger)}
+.badge.amber{background:var(--warning-bg);color:var(--warning)}
+.badge.green{background:var(--success-bg);color:var(--success)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulsing{animation:pulse 1.8s infinite}
+.action-btns{display:flex;gap:4px}
+.btn-xs{border:1px solid var(--border);background:var(--white);border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--text-sec);transition:all .15s;white-space:nowrap}
+.btn-xs:hover{background:var(--gray-light);color:var(--text)}
+.btn-xs.done:hover{background:var(--success-bg);color:var(--success);border-color:#a5d6a7}
+.btn-xs.edit:hover{background:var(--blue-light);color:var(--blue);border-color:#90caf9}
+.btn-xs.del:hover{background:var(--danger-bg);color:var(--danger);border-color:#ef9a9a}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:12px;padding:1.75rem;width:440px;max-width:96vw;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h2{font-size:17px;font-weight:700;color:var(--green-dark);margin-bottom:1.1rem}
+.form-row{margin-bottom:11px}
+.form-row label{font-size:11px;font-weight:700;color:var(--text-sec);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;font-size:14px;color:var(--text);background:var(--white);outline:none;font-family:inherit}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:8px;margin-top:1.2rem}
+.modal-actions button{flex:1;padding:10px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none}
+.btn-save{background:var(--green);color:white}.btn-save:hover{background:var(--green-dark)}
+.btn-cancel{background:var(--gray-light);color:var(--text-sec)}.btn-cancel:hover{background:#e0e0e0}
+/* TOAST */
+.toast-container{position:fixed;top:74px;right:1.5rem;z-index:600;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--green);border-radius:var(--radius);padding:11px 16px;min-width:250px;box-shadow:var(--shadow);transform:translateX(120%);transition:transform .3s cubic-bezier(.175,.885,.32,1.275);display:flex;align-items:flex-start;gap:10px}
+.toast.show{transform:translateX(0)}
+.toast.danger{border-left-color:var(--danger)}.toast.warning{border-left-color:var(--warning)}
+.toast-icon{font-size:17px;margin-top:1px}
+.toast-title{font-size:13px;font-weight:700;color:var(--text)}
+.toast-body{font-size:12px;color:var(--text-sec);margin-top:1px}
+/* NOTIFICATION STRIP */
+.notif-strip{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--danger);border-radius:var(--radius);padding:10px 16px;margin-bottom:1rem;display:none}
+.notif-strip.visible{display:flex;align-items:center;gap:12px}
+.notif-strip-text{font-size:13px;font-weight:600;color:var(--danger)}
+.notif-strip-sub{font-size:12px;color:var(--text-sec)}
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.report-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;box-shadow:var(--shadow)}
+.report-card h3{font-size:12px;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;border-bottom:2px solid var(--green);padding-bottom:6px}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.report-row:last-child{border-bottom:none;font-weight:700;font-size:14px}
+.report-full{grid-column:1/-1}
+.dept-bar-wrap{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0}
+.dept-bar-wrap:last-child{border-bottom:none}
+.dept-name{font-size:13px;width:140px;flex-shrink:0}
+.dept-bar-track{flex:1;height:7px;background:#e8f5e9;border-radius:4px;overflow:hidden}
+.dept-bar-fill{height:7px;background:var(--green);border-radius:4px}
+.dept-cost{font-size:12px;font-weight:600;width:100px;text-align:right}
+/* MONTHLY REPORT MODAL */
+.month-modal{background:var(--white);border-radius:12px;padding:2rem;width:700px;max-width:97vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.22)}
+.month-sel-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap}
+.month-sel-bar select{border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-size:14px;outline:none}
+.month-sel-bar select:focus{border-color:var(--green)}
+.month-header{display:flex;align-items:center;gap:16px;padding-bottom:14px;border-bottom:2px solid var(--green);margin-bottom:1rem}
+.month-logo{height:38px}
+.month-co{font-size:13px;font-weight:700;color:var(--green-dark)}
+.month-co-sub{font-size:11px;color:var(--text-sec)}
+.month-title{font-size:16px;font-weight:700;color:var(--text);margin-left:auto;text-align:right}
+.month-title small{display:block;font-size:12px;font-weight:400;color:var(--text-sec)}
+.month-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.month-kpi-card{background:#f8faf8;border:1px solid var(--border);border-radius:6px;padding:10px 12px;text-align:center}
+.month-kpi-label{font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.month-kpi-val{font-size:20px;font-weight:700;color:var(--green-dark)}
+.m-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-sec);margin:14px 0 6px}
+.m-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px}
+.m-table th{background:#f8faf8;border:1px solid #e8e8e8;padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase}
+.m-table td{border:1px solid #e8e8e8;padding:7px 10px;vertical-align:middle}
+.m-table tr:nth-child(even) td{background:#fafafa}
+.m-total-row td{font-weight:700;background:#e8f5e9!important;color:var(--green-dark)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.status-dot.red{background:var(--danger)}.status-dot.amber{background:var(--warning)}.status-dot.green{background:var(--success)}
+.print-footer{margin-top:1.5rem;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-sec);display:flex;justify-content:space-between}
+.month-actions{display:flex;gap:8px;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
+/* PRINT STYLES */
+@media print{
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:fixed;inset:0;padding:20px;background:white}
+  .month-actions,.hdr-btn,.add-btn,.tabs,.filter-bar,.action-btns,.notif-strip,.toast-container{display:none!important}
+}
+@media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.report-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo-area">
+    <img class="logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAtAMBIgACEQEDEQH/xAAbAAEAAgMBAQAAAAAAAAAAAAAAAQYCBAUHA//EADUQAAEDAwIEAwUGBwAAAAAAAAABAgMEBREGEhMhMUEUUXEyYYGRoQcVIiNCUjdzdLGywdH/xAAaAQEAAwEBAQAAAAAAAAAAAAABAgIDBAUG/8QAIxEBAQEAAgEEAgMBAAAAAAAAAAECAxESBCExQRMyBWGRFP/aAAwDAQACEQMRAD8A9xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhwEg49beooaptNCxZpHLhUReSG/V1cNHTunqXtjjamVc5SmOTO7Zn6V8p8tkFNdryjSq2JTSLBnnImM/ItdJUQ1dOyaB7XsemUVFN98W8ftFccud/rX3BW6/UqUmraGw+GVy1bFdxd3s4RV6fAsZS5s67XllSD5TSMhifLI5EYxFc5V7InUq+jdZ0+paqrp2wLA+Dm3Ls724VMkzOrLZ9F1JeltBxdWXxNPWWW48HjcNzU2I7Gcrg37ZU+NoKer27ONG1+3OcZTJHV67O5302wY4Kietb0tp1RSWWSLdxVYkk27CRq7pn6E5zdXqIupPlcAYLhE9xVdK60pdQV1VQrH4epge5GMc5PzERcZQTOrLZ9F1JZKtoK5edSJbNQ2u0rTLItdn8xHYRmCwoRZZKmXv2ZAAhIAAAAAGjealaS3yyt9pEw31XkbxydTxq+0ybc/hVF+plz2zj1Yi+0V/TjGyXJZ5nco2K9zneZXtVX2S71asjVUpInYY393vU6EUyNhqIXb9k8ex2x2FT05GvFT0dPzgpI9yfqk/Gv15fQ4/411/pvTcdvJ76cXJNazMxXNjtm/auzONypyz6lz+zq4vSee3SOVWOTexPJe5nVQPTTNfV1aqrXsa2Jq9l3Jzwc37P4nPv3ERF2xxO3L6n0OPUf9XpryXPTHjxeLlnVbN+/i3Yv5Lv8XnoaqmF5lK1XpO53TUNNd7TcoaOanj2Nc5m5UXnz6Kncytdm1jBcaeav1JHUUzXZlhSBqb0x09k5t+Osz3+I78251fZl9qN3+7NLTRsejZat3BaueiL1X5FNhutjsuoNO1FmropmNgSjrNndP3L8VUvV70xNedTW6vqZ41oKNM+HVFy53v7eXyPvqzS9PfbNNRQthp5nKjo5UZja5PQtjkxnMl+/lXWdW9ud9q6o7RFSqLlOJH8fxIWHTSomn7d/Ts/shyL5p+uvGjmWeaqh8WjY0fNhdrlaqc/Pscin0xrengjgg1TCyKNqNa1KduERO3NuSvWbjx7T7zffS9VlRHSU0tRK5GsiYr3L7kPEX3Cz3Sy3+tr6+KO7VlQk1LG7O5rWLlqJ6plD1K9WW63LSa2rx0fjZY2x1FSrcI5P1YRPP8A2pt2iwUdttVNQrTwycKNGq5WJzXuo495xP7N5uq+Oj7sl503SVauRZFj2S4Xo5OSnlFlsVZXU90vFne9lyt9c50aMX225VVTHn19U5HpujtNVOnHXCHxEclHPMskDEzmPPbn8BovTU+nUuCTzxy+KqFlbsRU2ovYtnkmPLxRcXUnajLqGHUurtJ1TURs7Fe2oj/Y7/h7CUiq0DEmsKW+2+VkDGy8WeFU6ux1b5ZLv3Kc2868fFPFnU77SADFsAAAAAB8542yxOjemWuTCn0IUiyWdUUO5WqeinVqMc+NVXY5EzyNuz2KWokSWqarIU7L1cXBWovVBjB5+f47jm/K/wCM/wAc7U/XT5pIaS1UUD3OkdvcjG55J0Q6ekrH9z0KrLhambnIqdvcdxWoq57+hknJD1fyX8f458InFPPzVq9yVTKypWFahEbExGSMlVrIlVcbnNz+JE78lIuN3mdSSRxPaydFmR21HIrNj8N78soWVWIqrnHP3GPCbleSc+vLqZtVdluFU6riYlXTNa2RW8dI3cNcsVcK3d1RU657kw3qumkY1II2orY1wqY4iOTqiq7l8lLDwWY27W7fLaTw25RcIqp0ynQDhMudY1KR9Q6BrZmo9yMiVXIqrhEwrs/HC/DB3kTuRwm5aqomU6cuhkiYHQYGCQBGBgkARgEgAAAAAAAAAAABGCQBGCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//2Q==" alt="LALAN Rubbers">
+    <div class="logo-divider"></div>
+    <div><div class="logo-title">LALAN RUBBERS PVT LTD</div><div class="logo-sub">Factory Maintenance Management System</div></div>
+  </div>
+  <div class="header-right">
+    <div class="date-badge" id="live-date"></div>
+    <button class="hdr-btn" onclick="openMonthModal()">📅 Monthly Report</button>
+    <button class="hdr-btn pdf" onclick="openMonthModal('pdf')">⬇ PDF</button>
+    <button class="add-btn" onclick="openModal()">+ Add Task</button>
+  </div>
+</header>
+
+<div class="toast-container" id="toasts"></div>
+
+<div class="container">
+  <div class="notif-strip" id="notif-strip">
+    <span style="font-size:20px">⚠️</span>
+    <div><div class="notif-strip-text" id="notif-strip-text"></div><div class="notif-strip-sub" id="notif-strip-sub"></div></div>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('schedule',this)">📋 Schedule</button>
+    <button class="tab" onclick="switchTab('report',this)">📊 Summary Report</button>
+  </div>
+
+  <div class="view active" id="view-schedule">
+    <div class="filter-bar">
+      <div style="position:relative">
+        <input type="text" id="search-input" placeholder="🔍  Search tasks..." oninput="onSearchInput()" autocomplete="off" style="min-width:240px">
+        <div id="suggest-box" style="display:none;position:absolute;top:38px;left:0;width:340px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;max-height:280px;overflow-y:auto"></div>
+      </div>
+      <select id="filter-dept" onchange="renderTable()"><option value="">All Departments</option></select>
+      <select id="filter-status" onchange="renderTable()">
+        <option value="">All Status</option>
+        <option value="overdue">Overdue</option>
+        <option value="critical">Critical (≤3 days)</option>
+        <option value="upcoming">Upcoming (≤7 days)</option>
+        <option value="ok">On Track</option>
+      </select>
+      <select id="filter-freq" onchange="renderTable()">
+        <option value="">All Frequency</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+        <option value="biannual">6-Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Task</th><th>Dept</th><th>Due Date</th><th>Countdown</th>
+          <th>Progress</th><th>Status</th><th>Cost (LKR)</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="task-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="view" id="view-report">
+    <div class="report-grid" id="report-grid"></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h2>🔧 <span id="modal-title">Add Maintenance Task</span></h2>
+    <div class="form-grid">
+      <div class="form-row" style="grid-column:1/-1;position:relative">
+        <label>Task Name *</label>
+        <input type="text" id="f-name" placeholder="Type to search templates or enter new task..." autocomplete="off" oninput="onTaskNameInput()">
+        <div id="template-suggest" style="display:none;position:absolute;top:58px;left:0;right:0;background:#fff;border:1px solid #e0e0e0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:300;max-height:210px;overflow-y:auto"></div>
+      </div>
+      <div class="form-row">
+        <label>Department *</label>
+        <select id="f-dept">
+          <option value="Maintenance">Maintenance</option>
+          <option value="Production">Production</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Frequency</label>
+        <select id="f-freq">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly" selected>Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="biannual">Every 6 Months</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Next Due Date *</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-row">
+        <label>Estimated Cost (LKR)</label>
+        <input type="number" id="f-cost" placeholder="0" min="0">
+      </div>
+      <div class="form-row">
+        <label>Assigned To</label>
+        <input type="text" id="f-assign" placeholder="Engineer / Technician">
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Notes</label>
+        <textarea id="f-notes" rows="2" placeholder="Machine ID, spare parts, instructions..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="modal-save-btn" onclick="saveTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY REPORT MODAL -->
+<div class="modal-overlay" id="month-modal" onclick="closeMonthOutside(event)">
+  <div class="month-modal">
+    <div class="month-sel-bar">
+      <strong style="font-size:14px;color:var(--green-dark)">📅 Monthly Maintenance Report</strong>
+      <select id="sel-month"></select>
+      <select id="sel-year"></select>
+      <button class="hdr-btn" style="margin-left:auto" onclick="renderMonthReport()">🔄 Refresh</button>
+      <button class="hdr-btn" onclick="printMonthReport()">🖨 Print</button>
+      <button class="hdr-btn pdf" onclick="downloadPDF()">⬇ Download PDF</button>
+      <button class="btn-cancel" style="border-radius:var(--radius);padding:7px 14px;border:1px solid var(--border);cursor:pointer;font-size:13px" onclick="closeMonthModal()">✕ Close</button>
+    </div>
+    <div id="print-area"></div>
+  </div>
+</div>
+
+<script>
+const FREQ_DAYS={daily:1,weekly:7,monthly:30,quarterly:91,biannual:182,yearly:365};
+const FREQ_LABEL={daily:'Daily',weekly:'Weekly',monthly:'Monthly',quarterly:'Quarterly',biannual:'Every 6 Months',yearly:'Yearly'};
+const FREQ_PER_YEAR={daily:365,weekly:52,monthly:12,quarterly:4,biannual:2,yearly:1};
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const LOGO_B64='data:image/jpeg;base64,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';
+
+// ── localStorage helpers ──
+const DB_KEY = 'lalan_tasks_v1';
+function loadTasks(){try{return JSON.parse(localStorage.getItem(DB_KEY))||[];}catch(e){return[];}}
+function saveTasks(){localStorage.setItem(DB_KEY,JSON.stringify(tasks));showToast('success','Saved','Data saved to browser storage.');}
+
+let tasks = loadTasks();
+let editingId = null;
+
+const TASK_TEMPLATES=[
+  {name:'Roller Change',dept:'Maintenance',freq:'monthly',cost:0,notes:'Check roller alignment and bearing condition'},
+  {name:'Roller Bearing Replacement',dept:'Maintenance',freq:'quarterly',cost:0,notes:'Grease and inspect roller bearings'},
+  {name:'Roller Alignment Check',dept:'Maintenance',freq:'weekly',cost:0,notes:'Laser alignment check on all rollers'},
+  {name:'Belt Tensioning',dept:'Maintenance',freq:'weekly',cost:0,notes:'Check and adjust conveyor belt tension'},
+  {name:'Belt Replacement',dept:'Maintenance',freq:'yearly',cost:0,notes:'Full conveyor belt replacement'},
+  {name:'Hydraulic Oil Change',dept:'Maintenance',freq:'quarterly',cost:0,notes:'Drain and refill hydraulic system oil'},
+  {name:'Hydraulic Filter Replacement',dept:'Maintenance',freq:'monthly',cost:0,notes:'Replace hydraulic return and suction filters'},
+  {name:'Hydraulic Pressure Check',dept:'Maintenance',freq:'weekly',cost:0,notes:'Check system pressure and leak points'},
+  {name:'Lubrication – All Bearings',dept:'Maintenance',freq:'weekly',cost:0,notes:'Grease all machine bearings as per schedule'},
+  {name:'Gearbox Oil Level Check',dept:'Maintenance',freq:'monthly',cost:0,notes:'Inspect oil level and check for leaks'},
+  {name:'Gearbox Oil Change',dept:'Maintenance',freq:'biannual',cost:0,notes:'Full gearbox oil drain and refill'},
+  {name:'Cooling Tower Cleaning',dept:'Maintenance',freq:'monthly',cost:0,notes:'Clean fill media, basin and drift eliminators'},
+  {name:'Cooling Water Treatment',dept:'Maintenance',freq:'weekly',cost:0,notes:'Dose biocide and scale inhibitor'},
+  {name:'Compressor Air Filter Replacement',dept:'Maintenance',freq:'monthly',cost:0,notes:'Replace inlet air filters on all compressors'},
+  {name:'Compressor Oil Change',dept:'Maintenance',freq:'quarterly',cost:0,notes:'Drain compressor sump and refill with correct grade'},
+  {name:'Compressor Belt Check',dept:'Maintenance',freq:'monthly',cost:0,notes:'Inspect V-belts for wear and tension'},
+  {name:'Air Dryer Service',dept:'Maintenance',freq:'quarterly',cost:0,notes:'Clean pre-filter, check dew point'},
+  {name:'Boiler Tube Cleaning',dept:'Maintenance',freq:'biannual',cost:0,notes:'Chemical and mechanical tube cleaning'},
+  {name:'Boiler Safety Valve Test',dept:'Maintenance',freq:'monthly',cost:0,notes:'Manual lift test of all safety valves'},
+  {name:'Boiler Blowdown',dept:'Maintenance',freq:'daily',cost:0,notes:'Bottom and surface blowdown as per SOP'},
+  {name:'Boiler Water Treatment',dept:'Maintenance',freq:'monthly',cost:0,notes:'Test pH, hardness, conductivity and dose chemicals'},
+  {name:'Generator Service & Oil Change',dept:'Maintenance',freq:'quarterly',cost:0,notes:'Full PM service including oil, filter, coolant check'},
+  {name:'Generator Load Test',dept:'Maintenance',freq:'monthly',cost:0,notes:'Run on load for minimum 30 minutes'},
+  {name:'Electrical Panel Thermography',dept:'Maintenance',freq:'biannual',cost:0,notes:'IR thermography scan on MDB and SDB panels'},
+  {name:'Motor Insulation Test',dept:'Maintenance',freq:'yearly',cost:0,notes:'Megger test on all production motors'},
+  {name:'Earth Pit Resistance Test',dept:'Maintenance',freq:'yearly',cost:0,notes:'Check all earth pits with earth resistance tester'},
+  {name:'UPS Battery Replacement',dept:'Maintenance',freq:'yearly',cost:0,notes:'Replace UPS cells and test backup time'},
+  {name:'Pump Seal Replacement',dept:'Maintenance',freq:'biannual',cost:0,notes:'Replace mechanical seals on all process pumps'},
+  {name:'Pump Impeller Inspection',dept:'Maintenance',freq:'yearly',cost:0,notes:'Remove and inspect for wear or cavitation damage'},
+  {name:'Valve Greasing & Stroking',dept:'Maintenance',freq:'monthly',cost:0,notes:'Operate and grease all gate and globe valves'},
+  {name:'Sprinkler System Test',dept:'Maintenance',freq:'monthly',cost:0,notes:'Test flow and pressure at all sprinkler zones'},
+  {name:'Fire Extinguisher Inspection',dept:'Maintenance',freq:'monthly',cost:0,notes:'Check pressure gauge, pin and hose on all extinguishers'},
+  {name:'Fire Pump Test',dept:'Maintenance',freq:'monthly',cost:0,notes:'Run diesel and electric fire pumps for 30 minutes'},
+  {name:'Production Line Cleaning',dept:'Production',freq:'daily',cost:0,notes:'Full clean-down of production line after shift'},
+  {name:'Production Machine PM',dept:'Production',freq:'monthly',cost:0,notes:'Planned maintenance service as per OEM schedule'},
+  {name:'Die & Mould Inspection',dept:'Production',freq:'weekly',cost:0,notes:'Inspect dies and moulds for wear, clean and store'},
+  {name:'Weighing Scale Calibration',dept:'Production',freq:'quarterly',cost:0,notes:'Calibrate all production floor weighing scales'},
+  {name:'Conveyor Speed Check',dept:'Production',freq:'weekly',cost:0,notes:'Verify conveyor speed with tachometer'},
+  {name:'Mixing Machine Blade Inspection',dept:'Production',freq:'monthly',cost:0,notes:'Check blade condition and torque fasteners'},
+  {name:'Extruder Screw Inspection',dept:'Production',freq:'biannual',cost:0,notes:'Remove and inspect extruder screw for wear'},
+  {name:'Vulcanizer Press Inspection',dept:'Production',freq:'monthly',cost:0,notes:'Check platens, seals and heating elements'},
+];
+
+function daysFromNow(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function daysLeft(s){const d=new Date(s),t=new Date();d.setHours(0,0,0,0);t.setHours(0,0,0,0);return Math.round((d-t)/86400000);}
+function fmtDate(s){return new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtCost(n){return 'Rs. '+Number(n||0).toLocaleString();}
+function uid(){return Date.now()+Math.random();}
+function statusInfo(d){
+  if(d<0) return{cls:'red',label:'Overdue',code:'overdue'};
+  if(d===0) return{cls:'red',label:'Due Today',code:'critical'};
+  if(d<=3) return{cls:'red',label:d+'d left',code:'critical'};
+  if(d<=7) return{cls:'amber',label:d+'d left',code:'upcoming'};
+  return{cls:'green',label:d+'d left',code:'ok'};
+}
+function progressPct(d,freq){const tot=FREQ_DAYS[freq]||30;return Math.min(100,Math.max(0,Math.round(((tot-Math.max(d,0))/tot)*100)));}
+function barColor(cls){return cls==='red'?'#c62828':cls==='amber'?'#e65100':'#2e7d32';}
+
+// ── DATE ──
+function updateDate(){document.getElementById('live-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
+updateDate();setInterval(updateDate,60000);
+
+// ── KPI ──
+function renderKPI(){
+  const all=tasks.map(t=>({...t,days:daysLeft(t.date)}));
+  const overdue=all.filter(t=>t.days<0).length;
+  const critical=all.filter(t=>t.days>=0&&t.days<=3).length;
+  const monthCost=tasks.reduce((s,t)=>s+(Number(t.cost||0)*FREQ_PER_YEAR[t.freq]/12),0);
+  const yearlyCost=tasks.reduce((s,t)=>s+(Number(t.cost||0)*FREQ_PER_YEAR[t.freq]),0);
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Total Tasks</div><div class="kpi-val">${tasks.length}</div><div class="kpi-sub">Active schedules</div></div>
+    <div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-val red">${overdue}</div><div class="kpi-sub">Immediate action</div></div>
+    <div class="kpi"><div class="kpi-label">Critical ≤3 days</div><div class="kpi-val amber">${critical}</div><div class="kpi-sub">Due very soon</div></div>
+    <div class="kpi"><div class="kpi-label">Monthly Cost</div><div class="kpi-val green" style="font-size:17px">${fmtCost(Math.round(monthCost))}</div><div class="kpi-sub">Estimated average</div></div>
+    <div class="kpi"><div class="kpi-label">Yearly Cost</div><div class="kpi-val" style="font-size:17px">${fmtCost(Math.round(yearlyCost))}</div><div class="kpi-sub">Total annual spend</div></div>
+  `;
+}
+
+// ── DEPT DROPDOWN ──
+function refreshDeptDropdown(){
+  const depts=[...new Set(tasks.map(t=>t.dept))].sort();
+  const sel=document.getElementById('filter-dept');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All Departments</option>'+depts.map(d=>`<option value="${d}"${d===cur?' selected':''}>${d}</option>`).join('');
+}
+
+// ── SEARCH AUTOCOMPLETE ──
+function onSearchInput(){
+  renderTable();
+  const val=document.getElementById('search-input').value.trim().toLowerCase();
+  const box=document.getElementById('suggest-box');
+  if(!val){box.style.display='none';return;}
+  const hits=tasks.filter(t=>t.name.toLowerCase().includes(val)||t.dept.toLowerCase().includes(val)||(t.assign||'').toLowerCase().includes(val)).slice(0,8);
+  if(!hits.length){box.style.display='none';return;}
+  box.style.display='block';
+  box.innerHTML=hits.map(t=>{
+    const d=daysLeft(t.date),st=statusInfo(d);
+    const hi=s=>s.replace(new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark style="background:#fff9c4;border-radius:2px">$1</mark>');
+    return`<div onclick="selectSearch('${t.name.replace(/'/g,"\\'")}',event)" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;font-size:13px" onmouseover="this.style.background='#f8faf8'" onmouseout="this.style.background=''"><span style="flex:1"><strong>${hi(t.name)}</strong><br><span style="font-size:11px;color:#9e9e9e">${t.dept} · ${FREQ_LABEL[t.freq]}</span></span><span class="badge ${st.cls}" style="font-size:10px;padding:2px 7px">${st.label}</span></div>`;
+  }).join('');
+}
+function selectSearch(name,e){document.getElementById('search-input').value=name;document.getElementById('suggest-box').style.display='none';renderTable();}
+document.addEventListener('click',e=>{if(!e.target.closest('#suggest-box')&&e.target.id!=='search-input')document.getElementById('suggest-box').style.display='none';});
+
+// ── TEMPLATE AUTOCOMPLETE ──
+function onTaskNameInput(){
+  const val=document.getElementById('f-name').value.trim().toLowerCase();
+  const box=document.getElementById('template-suggest');
+  if(!val){box.style.display='none';return;}
+  const hits=TASK_TEMPLATES.filter(t=>t.name.toLowerCase().includes(val)).slice(0,10);
+  if(!hits.length){box.style.display='none';return;}
+  box.style.display='block';
+  box.innerHTML=hits.map((t,i)=>{
+    const hi=s=>s.replace(new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark style="background:#fff9c4;border-radius:2px">$1</mark>');
+    return`<div onclick="applyTemplate(${i},event)" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;font-size:13px" onmouseover="this.style.background='#f0f7f0'" onmouseout="this.style.background=''"><div style="font-weight:600">${hi(t.name)}</div><div style="font-size:11px;color:#9e9e9e;margin-top:2px">${t.dept} · ${FREQ_LABEL[t.freq]}${t.notes?' · '+t.notes.substring(0,40):''}</div></div>`;
+  }).join('');
+  box._hits=hits;
+}
+function applyTemplate(idx,e){
+  e&&e.stopPropagation();
+  const box=document.getElementById('template-suggest');
+  const t=box._hits[idx];
+  document.getElementById('f-name').value=t.name;
+  document.getElementById('f-dept').value=t.dept;
+  document.getElementById('f-freq').value=t.freq;
+  if(t.cost)document.getElementById('f-cost').value=t.cost;
+  if(t.notes)document.getElementById('f-notes').value=t.notes;
+  box.style.display='none';
+}
+document.addEventListener('click',e=>{if(!e.target.closest('#template-suggest')&&e.target.id!=='f-name'){const b=document.getElementById('template-suggest');if(b)b.style.display='none';}});
+
+// ── TABLE ──
+function renderTable(){
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const dept=document.getElementById('filter-dept').value;
+  const status=document.getElementById('filter-status').value;
+  const freq=document.getElementById('filter-freq').value;
+  let filtered=tasks.map(t=>({...t,days:daysLeft(t.date),st:statusInfo(daysLeft(t.date))}));
+  if(search) filtered=filtered.filter(t=>t.name.toLowerCase().includes(search)||t.dept.toLowerCase().includes(search)||(t.assign||'').toLowerCase().includes(search));
+  if(dept) filtered=filtered.filter(t=>t.dept===dept);
+  if(status) filtered=filtered.filter(t=>t.st.code===status);
+  if(freq) filtered=filtered.filter(t=>t.freq===freq);
+  filtered.sort((a,b)=>a.days-b.days);
+  const tbody=document.getElementById('task-tbody');
+  if(!filtered.length){
+    const msg=tasks.length===0?'No tasks added yet. Click <strong>+ Add Task</strong> to get started.':'No tasks match your filters.';
+    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:2.5rem;color:#9e9e9e;font-size:14px">${msg}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=filtered.map(t=>{
+    const pct=progressPct(t.days,t.freq);
+    const pulse=t.days<=3?' pulsing':'';
+    return`<tr>
+      <td><div class="task-name">${t.name}</div><div class="task-dept">${t.assign?'👤 '+t.assign:''}${t.notes?' · '+t.notes.substring(0,28)+(t.notes.length>28?'...':''):''}</div></td>
+      <td><span style="background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px">${t.dept}</span></td>
+      <td style="font-size:13px;white-space:nowrap">${fmtDate(t.date)}<br><span style="font-size:11px;color:#9e9e9e">${FREQ_LABEL[t.freq]}</span></td>
+      <td><div class="countdown-cell"><span class="days-big ${t.st.cls}">${Math.abs(t.days)}</span><span class="days-label">${t.days<0?'days overdue':'days left'}</span></div></td>
+      <td><div class="progress-wrap"><div style="font-size:11px;color:#9e9e9e;margin-bottom:3px">${pct}%</div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${barColor(t.st.cls)}"></div></div></div></td>
+      <td><span class="badge ${t.st.cls}${pulse}">${t.st.label}</span></td>
+      <td style="font-size:13px;white-space:nowrap;font-weight:600">${fmtCost(t.cost)}</td>
+      <td><div class="action-btns">
+        <button class="btn-xs done" onclick="markDone(${t.id})">✔ Done</button>
+        <button class="btn-xs edit" onclick="editTask(${t.id})">✎ Edit</button>
+        <button class="btn-xs del" onclick="deleteTask(${t.id})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SUMMARY REPORT ──
+function renderReport(){
+  const yearlyByTask=tasks.map(t=>({name:t.name,dept:t.dept,yearly:Number(t.cost||0)*FREQ_PER_YEAR[t.freq]})).sort((a,b)=>b.yearly-a.yearly);
+  const totalYearly=yearlyByTask.reduce((s,t)=>s+t.yearly,0);
+  const totalMonthly=totalYearly/12;
+  const byDept={};tasks.forEach(t=>{byDept[t.dept]=(byDept[t.dept]||0)+Number(t.cost||0)*FREQ_PER_YEAR[t.freq];});
+  const deptArr=Object.entries(byDept).sort((a,b)=>b[1]-a[1]);
+  const maxDept=deptArr[0]?.[1]||1;
+  const freqCount={};tasks.forEach(t=>{freqCount[t.freq]=(freqCount[t.freq]||0)+1;});
+  document.getElementById('report-grid').innerHTML=`
+    <div class="report-card"><h3>📅 Monthly Cost</h3>
+      ${yearlyByTask.map(t=>`<div class="report-row"><span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name}</span><span style="font-weight:600">${fmtCost(Math.round(t.yearly/12))}</span></div>`).join('')}
+      <div class="report-row"><span>Total Monthly</span><span>${fmtCost(Math.round(totalMonthly))}</span></div></div>
+    <div class="report-card"><h3>📆 Yearly Cost</h3>
+      ${yearlyByTask.map(t=>`<div class="report-row"><span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name}</span><span style="font-weight:600">${fmtCost(t.yearly)}</span></div>`).join('')}
+      <div class="report-row"><span>Total Yearly</span><span>${fmtCost(totalYearly)}</span></div></div>
+    <div class="report-card report-full"><h3>🏭 Cost by Department</h3>
+      ${deptArr.map(([d,c])=>`<div class="dept-bar-wrap"><span class="dept-name">${d}</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:${Math.round(c/maxDept*100)}%"></div></div><span class="dept-cost">${fmtCost(c)}/yr</span></div>`).join('')}</div>
+    <div class="report-card"><h3>🔁 By Frequency</h3>${Object.entries(freqCount).map(([f,c])=>`<div class="report-row"><span>${FREQ_LABEL[f]}</span><span>${c} task${c>1?'s':''}</span></div>`).join('')}</div>
+    <div class="report-card"><h3>📌 By Department</h3>${deptArr.map(([d])=>{const c=tasks.filter(t=>t.dept===d).length;return`<div class="report-row"><span>${d}</span><span>${c} task${c>1?'s':''}</span></div>`;}).join('')}</div>
+  `;
+}
+
+// ── MONTHLY REPORT ──
+function buildMonthSelectors(){
+  const mSel=document.getElementById('sel-month');
+  const ySel=document.getElementById('sel-year');
+  const now=new Date();
+  mSel.innerHTML=MONTHS.map((m,i)=>`<option value="${i}"${i===now.getMonth()?' selected':''}>${m}</option>`).join('');
+  const yr=now.getFullYear();
+  ySel.innerHTML=[yr-1,yr,yr+1].map(y=>`<option value="${y}"${y===yr?' selected':''}>${y}</option>`).join('');
+}
+
+function getMonthTasks(month,year){
+  const start=new Date(year,month,1);
+  const end=new Date(year,month+1,0);
+  return tasks.filter(t=>{
+    const due=new Date(t.date);
+    return due>=start&&due<=end;
+  });
+}
+
+function renderMonthReport(){
+  const month=parseInt(document.getElementById('sel-month').value);
+  const year=parseInt(document.getElementById('sel-year').value);
+  const monthTasks=getMonthTasks(month,year);
+  const totalCost=monthTasks.reduce((s,t)=>s+Number(t.cost||0),0);
+  const overdue=monthTasks.filter(t=>daysLeft(t.date)<0).length;
+  const done=monthTasks.filter(t=>daysLeft(t.date)>0).length;
+  const today=monthTasks.filter(t=>daysLeft(t.date)===0).length;
+  const byDept={};
+  monthTasks.forEach(t=>{if(!byDept[t.dept])byDept[t.dept]=[];byDept[t.dept].push(t);});
+  const generatedOn=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  let html=`
+  <div id="print-content">
+    <div class="month-header">
+      <img class="month-logo" src="${LOGO_B64}" alt="LALAN Rubbers">
+      <div><div class="month-co">LALAN RUBBERS PVT LTD</div><div class="month-co-sub">Factory Maintenance Management System</div></div>
+      <div class="month-title">Monthly Maintenance Report<small>${MONTHS[month]} ${year}</small></div>
+    </div>
+    <div class="month-kpi">
+      <div class="month-kpi-card"><div class="month-kpi-label">Tasks This Month</div><div class="month-kpi-val">${monthTasks.length}</div></div>
+      <div class="month-kpi-card"><div class="month-kpi-label">Total Cost</div><div class="month-kpi-val" style="font-size:16px">${fmtCost(totalCost)}</div></div>
+      <div class="month-kpi-card"><div class="month-kpi-label">Overdue</div><div class="month-kpi-val" style="color:var(--danger)">${overdue}</div></div>
+      <div class="month-kpi-card"><div class="month-kpi-label">Upcoming / Done</div><div class="month-kpi-val" style="color:var(--success)">${done+today}</div></div>
+    </div>`;
+
+  if(!monthTasks.length){
+    html+=`<div style="text-align:center;padding:2rem;color:#9e9e9e;font-size:14px">No maintenance tasks scheduled for ${MONTHS[month]} ${year}.</div>`;
+  } else {
+    Object.entries(byDept).forEach(([dept,dTasks])=>{
+      const dCost=dTasks.reduce((s,t)=>s+Number(t.cost||0),0);
+      html+=`<div class="m-section-title">🏭 ${dept} Department</div>
+      <table class="m-table">
+        <thead><tr><th>#</th><th>Task Name</th><th>Assigned To</th><th>Due Date</th><th>Frequency</th><th>Status</th><th>Cost (LKR)</th><th>Notes</th></tr></thead>
+        <tbody>`;
+      dTasks.forEach((t,i)=>{
+        const d=daysLeft(t.date);
+        const st=statusInfo(d);
+        const stLabel=d<0?`Overdue ${Math.abs(d)}d`:d===0?'Due Today':st.label;
+        const stColor=st.cls==='red'?'#c62828':st.cls==='amber'?'#e65100':'#2e7d32';
+        html+=`<tr>
+          <td style="text-align:center;color:#9e9e9e">${i+1}</td>
+          <td><strong>${t.name}</strong></td>
+          <td>${t.assign||'—'}</td>
+          <td style="white-space:nowrap">${fmtDate(t.date)}</td>
+          <td>${FREQ_LABEL[t.freq]}</td>
+          <td><span style="color:${stColor};font-weight:600;font-size:12px">● ${stLabel}</span></td>
+          <td style="font-weight:600;white-space:nowrap">${fmtCost(t.cost)}</td>
+          <td style="font-size:12px;color:#546e7a">${t.notes||'—'}</td>
+        </tr>`;
+      });
+      html+=`<tr class="m-total-row"><td colspan="6" style="text-align:right">Department Total</td><td colspan="2">${fmtCost(dCost)}</td></tr>`;
+      html+=`</tbody></table>`;
+    });
+
+    html+=`<div class="m-section-title">💰 Cost Summary</div>
+    <table class="m-table" style="width:320px">
+      <thead><tr><th>Department</th><th>Tasks</th><th>Total Cost (LKR)</th></tr></thead>
+      <tbody>`;
+    Object.entries(byDept).forEach(([dept,dTasks])=>{
+      html+=`<tr><td>${dept}</td><td style="text-align:center">${dTasks.length}</td><td style="font-weight:600">${fmtCost(dTasks.reduce((s,t)=>s+Number(t.cost||0),0))}</td></tr>`;
+    });
+    html+=`<tr class="m-total-row"><td>TOTAL</td><td style="text-align:center">${monthTasks.length}</td><td>${fmtCost(totalCost)}</td></tr>
+    </tbody></table>`;
+  }
+
+  html+=`<div class="print-footer"><span>Generated: ${generatedOn}</span><span>LALAN RUBBERS PVT LTD – Confidential</span></div>
+  </div>`;
+
+  document.getElementById('print-area').innerHTML=html;
+}
+
+function openMonthModal(mode){
+  buildMonthSelectors();
+  document.getElementById('month-modal').classList.add('open');
+  renderMonthReport();
+  if(mode==='pdf') setTimeout(downloadPDF,400);
+}
+function closeMonthModal(){document.getElementById('month-modal').classList.remove('open');}
+function closeMonthOutside(e){if(e.target===document.getElementById('month-modal'))closeMonthModal();}
+
+function printMonthReport(){
+  const content=document.getElementById('print-area').innerHTML;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Monthly Report</title>
+  <style>
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#212121;padding:20px}
+    .month-header{display:flex;align-items:center;gap:16px;padding-bottom:14px;border-bottom:3px solid #4caf50;margin-bottom:1rem}
+    .month-logo{height:38px}
+    .month-co{font-size:13px;font-weight:700;color:#2e7d32}
+    .month-co-sub{font-size:11px;color:#546e7a}
+    .month-title{font-size:16px;font-weight:700;margin-left:auto;text-align:right}
+    .month-title small{display:block;font-size:12px;font-weight:400;color:#546e7a}
+    .month-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+    .month-kpi-card{background:#f8faf8;border:1px solid #e0e0e0;border-radius:6px;padding:10px 12px;text-align:center}
+    .month-kpi-label{font-size:10px;color:#546e7a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+    .month-kpi-val{font-size:20px;font-weight:700;color:#2e7d32}
+    .m-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#546e7a;margin:14px 0 6px}
+    .m-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+    .m-table th{background:#f8faf8;border:1px solid #e8e8e8;padding:6px 8px;text-align:left;font-size:11px;font-weight:700;color:#546e7a;text-transform:uppercase}
+    .m-table td{border:1px solid #e8e8e8;padding:6px 8px;vertical-align:middle}
+    .m-table tr:nth-child(even) td{background:#fafafa}
+    .m-total-row td{font-weight:700;background:#e8f5e9!important;color:#2e7d32}
+    .print-footer{margin-top:1.5rem;padding-top:10px;border-top:1px solid #e0e0e0;font-size:11px;color:#546e7a;display:flex;justify-content:space-between}
+    @media print{@page{margin:15mm}}
+  </style></head><body>${content}</body></html>`);
+  w.document.close();
+  setTimeout(()=>{w.focus();w.print();},500);
+}
+
+function downloadPDF(){
+  printMonthReport();
+  showToast('success','PDF Ready','Print dialog opened — choose "Save as PDF".');
+}
+
+// ── NOTIFICATIONS ──
+function checkNotifications(){
+  const urgent=tasks.filter(t=>daysLeft(t.date)<=3);
+  const strip=document.getElementById('notif-strip');
+  if(urgent.length){
+    strip.classList.add('visible');
+    document.getElementById('notif-strip-text').textContent=`⚠ ${urgent.length} task${urgent.length>1?'s':''} need immediate attention!`;
+    document.getElementById('notif-strip-sub').textContent=urgent.map(t=>{const d=daysLeft(t.date);return`${t.name}: ${d<0?Math.abs(d)+' days overdue':d===0?'due today':d+' days left'}`;}).join(' · ');
+    urgent.forEach((t,i)=>{const d=daysLeft(t.date);setTimeout(()=>showToast('danger',t.name,d<0?`Overdue by ${Math.abs(d)} day(s)`:d===0?'Due today':`Due in ${d} day(s)`),(i+1)*700);});
+  } else {strip.classList.remove('visible');}
+}
+
+// ── TOAST ──
+function showToast(type,title,body){
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=`<span class="toast-icon">${type==='danger'?'🔴':type==='warning'?'🟡':'🟢'}</span><div><div class="toast-title">${title}</div><div class="toast-body">${body}</div></div>`;
+  c.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},4500);
+}
+
+// ── MODAL ──
+function openModal(editId=null){
+  editingId=editId;
+  if(editId){
+    const t=tasks.find(t=>t.id===editId);
+    document.getElementById('modal-title').textContent='Edit Maintenance Task';
+    document.getElementById('f-name').value=t.name;
+    document.getElementById('f-dept').value=t.dept;
+    document.getElementById('f-freq').value=t.freq;
+    document.getElementById('f-date').value=t.date;
+    document.getElementById('f-cost').value=t.cost||'';
+    document.getElementById('f-assign').value=t.assign||'';
+    document.getElementById('f-notes').value=t.notes||'';
+    document.getElementById('modal-save-btn').textContent='Save Changes';
+  } else {
+    document.getElementById('modal-title').textContent='Add Maintenance Task';
+    ['f-name','f-cost','f-assign','f-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-freq').value='monthly';
+    document.getElementById('f-dept').value='Maintenance';
+    document.getElementById('f-date').value='';
+    document.getElementById('modal-save-btn').textContent='Add Task';
+  }
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('f-name').focus(),120);
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal();}
+
+function saveTask(){
+  const name=document.getElementById('f-name').value.trim();
+  const date=document.getElementById('f-date').value;
+  if(!name||!date){showToast('danger','Missing fields','Please fill in task name and due date.');return;}
+  const data={name,dept:document.getElementById('f-dept').value,freq:document.getElementById('f-freq').value,date,cost:Number(document.getElementById('f-cost').value)||0,assign:document.getElementById('f-assign').value.trim(),notes:document.getElementById('f-notes').value.trim()};
+  if(editingId){const idx=tasks.findIndex(t=>t.id===editingId);tasks[idx]={...tasks[idx],...data};}
+  else{tasks.push({id:uid(),...data});}
+  localStorage.setItem(DB_KEY,JSON.stringify(tasks));
+  showToast('success',editingId?'Updated':'Task Added',`"${name}" ${editingId?'updated':'added'} and saved.`);
+  closeModal();refresh();
+}
+
+function editTask(id){openModal(id);}
+function deleteTask(id){
+  const t=tasks.find(t=>t.id===id);
+  if(!confirm(`Delete "${t.name}"?`)) return;
+  tasks=tasks.filter(t=>t.id!==id);
+  localStorage.setItem(DB_KEY,JSON.stringify(tasks));
+  showToast('warning','Removed',`"${t.name}" deleted.`);
+  refresh();
+}
+function markDone(id){
+  const t=tasks.find(t=>t.id===id);
+  const next=new Date();next.setDate(next.getDate()+FREQ_DAYS[t.freq]);
+  t.date=next.toISOString().split('T')[0];
+  localStorage.setItem(DB_KEY,JSON.stringify(tasks));
+  showToast('success','Marked Done!',`Next "${t.name}" due ${fmtDate(t.date)}.`);
+  refresh();
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-'+name).classList.add('active');
+  if(name==='report') renderReport();
+}
+
+function refresh(){renderKPI();refreshDeptDropdown();renderTable();checkNotifications();}
+refresh();
+</script>
+</body>
+</html>
